@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<table>
+	<entry_1>
+		<title>Newton and the Counterfeiter</title> 
+		<author_1>Thomas Levenson</author_1>  
+		<author_2></author_2> 
+		<Person_of_note_1>Isaac Newton</Person_of_note_1> 
+                <Person_of_note_2>Robert Hooke</Person_of_note_2> 
+     		<Person_of_note_3>William Chaloner</Person_of_note_3> 
+		<Person_of_note_4></Person_of_note_4> 
+ 		<Person_of_note_5></Person_of_note_5>  
+		<Time_period>17th Century</Time_period>  
+	</entry_1>
+	<entry_2>
+		<title>The Swerve</title> 
+		<author_1>Stephen Greenblatt</author_1>  
+		<author_2></author_2> 
+		<Person_of_note_1>Poggio Bracciolini</Person_of_note_1> 
+		<Person_of_note_2>Lucretius</Person_of_note_2> 
+		<Person_of_note_3>Galileo</Person_of_note_3>
+		<Person_of_note_4></Person_of_note_4> 
+ 		<Person_of_note_5></Person_of_note_5>  
+		<Time_period>17th Century</Time_period>  
+	</entry_2>
+	<entry_3>
+		<title>Seven Ideas that Shook the Universe</title>  
+		<author_1>Bryon D. Anderson</author_1>  
+		<author_2>Nathan Spielberg</author_2>
+		<Person_of_note_1>Max Planck</Person_of_note_1>  
+		<Person_of_note_2>Galileo</Person_of_note_2>   		
+		<Person_of_note_3>Albert Einstein</Person_of_note_3>  
+		<Person_of_note_4>Isaac Newton</Person_of_note_4>  
+		<Person_of_note_5>Lord Kelvin</Person_of_note_5>   
+		<Time_period>20th Century</Time_period>  
+	</entry_3>
+</table>
