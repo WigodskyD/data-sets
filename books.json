@@ -1,7 +1,9 @@
 {"3 books" :[
 	{
 	"title"    : "Newton and the Counterfeiter",
-	"authors" : "Thomas Levenson",
+	"authors" : {
+			"1": "Thomas Levenson"
+		    },
 	"persons_of_note" :  {
 			"1": "Isaac Newton",
 			"2": "Robert Hooke",
@@ -11,7 +13,9 @@
 	},
 	{
 	"title"    : "The Swerve",
-	"authors" : "Stephen Greenblatt",
+	"authors" : {
+			"1": "Stephen Greenblatt"
+		    },
 	"persons_of_note" :  {
 			"1": "Poggio Bracciolini",
 			"2": "Lucretius",
@@ -22,8 +26,8 @@
 	{
 	"title"    : "Seven Ideas that Shook the Universe",
 	"authors" :     { 
-			"Bryon D. Anderson",
-			"Nathan Spielberg"
+			"1": "Bryon D. Anderson",
+			"2": "Nathan Spielberg"
 			},
 	"persons_of_note" :  {
 			"1": "Max Planck",
@@ -33,4 +37,5 @@
 			"5": "Lord Kelvin"
 			},
 	"Century": 20
-	},
+	}]
+}
