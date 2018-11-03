@@ -1,0 +1,171 @@
+---
+title: "throwaway"
+author: "Dan Wigodsky"
+date: "October 31, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(e1071)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+suppressWarnings(suppressMessages(library(MASS)))
+suppressWarnings(suppressMessages(library(car)))
+suppressWarnings(suppressMessages(library(corrplot)))
+suppressWarnings(suppressMessages(library(pROC)))
+suppressWarnings(suppressMessages(library(caret)))
+```
+###Our dataset consists of  
+"The Boston house-price data of Harrison, D. and Rubinfeld, D.L. 'Hedonic
+ prices and the demand for clean air', J. Environ. Economics & Management,
+ vol.5, 81-102, 1978.   Used in Belsley, Kuh & Welsch, 'Regression diagnostics
+ ...', Wiley, 1980.   N.B. Various transformations are used in the table on
+ pages 244-261 of the latter."
+
+![](https://raw.githubusercontent.com/WigodskyD/data-sets/master/boston_vars.png)
+
+```{r, warning=FALSE,echo=FALSE}
+
+
+
+boston_data_set<-read.csv('https://raw.githubusercontent.com/WigodskyD/data-sets/master/crime-training-data.csv')
+boston_data_set %>% 
+  mutate(taxrad=tax*rad) %>% 
+  mutate(radsq = rad^2) %>% 
+  mutate(taxsq = tax^1.7) %>% 
+  mutate(indussq = indus^2) %>% 
+  mutate(taxradsq = taxrad^2)->boston_data_set
+correl.matrix<-cor(boston_data_set, use="complete.obs")
+corrplot(correl.matrix,method="color",type="upper")
+plota<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$zn,aes(y=boston_data_set$zn,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='zn')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotb<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$indus,aes(y=boston_data_set$indus,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='indus')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotc<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$chas,aes(y=boston_data_set$chas,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='chas')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotd<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$nox,aes(y=boston_data_set$nox,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='nox')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plote<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$rm,aes(y=boston_data_set$rm,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='rm')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotf<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$age,aes(y=boston_data_set$age,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='age')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotg<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$dis,aes(y=boston_data_set$dis,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='dis')+ theme(panel.background = element_rect(fill = '#4286f4'))
+ploth<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$rad,aes(y=boston_data_set$rad,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='rad')+ theme(panel.background = element_rect(fill = '#4286f4'))
+ploti<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$tax,aes(y=boston_data_set$tax,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='tax')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotj<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$ptratio,aes(y=boston_data_set$ptratio,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='ptrario')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotk<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$lstat,aes(y=boston_data_set$lstat,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='lstat')+ theme(panel.background = element_rect(fill = '#4286f4'))
+plotl<-ggplot()+geom_boxplot(data=boston_data_set, y=boston_data_set$medv,aes(y=boston_data_set$medv,x=boston_data_set$target,group=boston_data_set$target))+labs(x='target',y='medv')+ theme(panel.background = element_rect(fill = '#4286f4'))
+grid.arrange(plota,plotb,plotc,plotd,plote,plotf,plotg,ploth,ploti,plotj,plotk,plotl,nrow = 3)
+```
+
+```{r, warning=FALSE,echo=FALSE}
+#options(expressions= 230000)
+set.seed(102)
+testing_indices<-sample(1:length(boston_data_set[,1]),(.4*length(boston_data_set$target)))
+testing_set<-boston_data_set[testing_indices,]
+training_set<-boston_data_set[-testing_indices,]
+
+full_model<-glm(data=training_set,target~zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+black+lstat+medv)
+vif(full_model)
+most_significant_predictors<-training_set[,c(4,6,8,13,14)]
+most_significant_model<-glm(data=most_significant_predictors,target~.,family=binomial(link='logit'))
+summary(most_significant_model)
+
+complicated_model<-glm(data=training_set,target~ nox+ age+ log(taxrad) +(taxrad*log(age)) +taxsq+radsq+medv,  family=binomial(link='logit'))
+summary(complicated_model)
+ggplot()+geom_point(aes(x=seq_along(resid(complicated_model)),y=resid(complicated_model)),color='blue',shape=9,size=3)+ylim(-1.3,1.3)+ theme(panel.background = element_rect(fill = '#d3dded'))+labs(x='Model 3',y='Residuals')
+ggplot()+geom_point(aes(x=seq_along(cooks.distance(complicated_model)),y=cooks.distance(complicated_model)),color='blue',shape=9,size=3)+ theme(panel.background = element_rect(fill = '#d3dded'))+labs(x='Model 3',y="Cook's Distance")
+
+#squares_model<-glm(data=training_set,target~+taxrad+indus+indussq+nox+rad,family=binomial(link='logit'))
+#summary(squares_model)
+#training_set %>% 
+#  mutate(percentage = predict(squares_model,training_set,type='response'))->training_set
+#head(training_set)
+
+full_model<-glm(data=training_set,target~zn+nox+age+dis+taxrad+ptratio+black+medv+indussq+taxsq,family=binomial(link='logit'))
+summary(full_model)
+
+#full_model<-glm(data=training_set,target~zn+indus +chas+nox+rm #+age+dis+rad+tax+ptratio+black+lstat+medv,family=binomial(link='logit'))
+#summary(full_model)
+
+
+```
+
+```{r, warning=FALSE,echo=FALSE,fig.width=7, fig.height=7}
+#options(expressions= 500000)
+plot.a<-ggplot()+geom_point(aes(y=training_set$dis,x=training_set$indus,color=training_set$target))+labs(x='indus',y='dis',color='target\n')+ theme(panel.background = element_rect(fill = 'white'))
+plot.b<-ggplot()+geom_point(aes(y=training_set$dis,x=training_set$nox,color=training_set$target))+labs(x='nox',y='dis',color='target\n')+ theme(panel.background = element_rect(fill = 'white'))
+plot.c<-ggplot()+geom_point(aes(y=training_set$dis,x=training_set$age,color=training_set$target))+labs(x='age',y='dis',color='target\n')+ theme(panel.background = element_rect(fill = 'white'))
+plot.d<-ggplot()+geom_point(aes(y=training_set$dis,x=training_set$taxrad,color=training_set$target))+labs(x='taxrad',y='dis',color='target\n')+ theme(panel.background = element_rect(fill = 'white'))
+grid.arrange(plot.a,plot.b,plot.c,plot.d,nrow = 2)
+
+means_group<-matrix(kmeans(training_set[,c(2,4,6,7,15)],8))
+training_set<-cbind(training_set,means_group[1])
+colnames(training_set)[20]<-'means_group'
+kmeans_model<-glm(data=training_set,target~zn+nox+age+dis+taxrad+ptratio+black+medv+taxsq+means_group,family=binomial(link='logit'))
+summary(kmeans_model)
+vif(kmeans_model)
+means_group<-matrix(kmeans(testing_set[,c(2,4,6,7,15)],8))
+testing_set<-cbind(testing_set,means_group[1])
+colnames(testing_set)[20]<-'means_group'
+prediction_set<-predict(kmeans_model,newdata=testing_set,type='response')
+target<-testing_set[,14]
+ROC_set<-cbind(target,prediction_set)
+
+roc_function_object<-roc(ROC_set[,1],ROC_set[,2])
+plot(roc_function_object)
+auc(roc_function_object)
+column1<-matrix(unlist(roc_function_object[2]))
+column2<-matrix(unlist(roc_function_object[3]))
+roc_function_matrix<-as.data.frame(cbind(column1,column2),ncol=2)
+colnames(roc_function_matrix)<-c('column1','column2')
+roc_function_matrix %>% 
+  mutate(mean = .5*(column1+(1-column2))) %>% 
+  mutate(euclidean_dist = ((column1-mean)^2+((1-column2)-mean)^2)^.5)->roc_function_matrix
+threshold<-(which.max(roc_function_matrix$euclidean_dist))/length(roc_function_matrix[,1])
+as.data.frame(ROC_set)  %>% 
+  mutate(guess = prediction_set >threshold )->ROC_set
+ROC_set$guess[ROC_set$guess ==TRUE]<-1
+ROC_set$guess<-as.factor(ROC_set$guess)
+ROC_set$target<-as.factor(ROC_set$target)
+confusionMatrix(ROC_set$guess,ROC_set$target,positive="1")
+#----------------------------------------------
+prediction_set<-predict(complicated_model,newdata=testing_set,type='response')
+target<-testing_set[,14]
+ROC_set<-cbind(target,prediction_set)
+
+roc_function_object<-roc(ROC_set[,1],ROC_set[,2])
+plot(roc_function_object)
+auc(roc_function_object)
+column1<-matrix(unlist(roc_function_object[2]))
+column2<-matrix(unlist(roc_function_object[3]))
+roc_function_matrix<-as.data.frame(cbind(column1,column2),ncol=2)
+colnames(roc_function_matrix)<-c('column1','column2')
+roc_function_matrix %>% 
+  mutate(mean = .5*(column1+(1-column2))) %>% 
+  mutate(euclidean_dist = ((column1-mean)^2+((1-column2)-mean)^2)^.5)->roc_function_matrix
+threshold<-(which.max(roc_function_matrix$euclidean_dist))/length(roc_function_matrix[,1])
+as.data.frame(ROC_set)  %>% 
+  mutate(guess = prediction_set >threshold )->ROC_set
+ROC_set$guess[ROC_set$guess ==TRUE]<-1
+ROC_set$guess<-as.factor(ROC_set$guess)
+ROC_set$target<-as.factor(ROC_set$target)
+confusionMatrix(ROC_set$guess,ROC_set$target,positive="1")
+#----------------------------------------------
+prediction_set<-predict(most_significant_model,newdata=testing_set,type='response')
+target<-testing_set[,14]
+ROC_set<-cbind(target,prediction_set)
+
+roc_function_object<-roc(ROC_set[,1],ROC_set[,2])
+plot(roc_function_object)
+auc(roc_function_object)
+column1<-matrix(unlist(roc_function_object[2]))
+column2<-matrix(unlist(roc_function_object[3]))
+roc_function_matrix<-as.data.frame(cbind(column1,column2),ncol=2)
+colnames(roc_function_matrix)<-c('column1','column2')
+roc_function_matrix %>% 
+  mutate(mean = .5*(column1+(1-column2))) %>% 
+  mutate(euclidean_dist = ((column1-mean)^2+((1-column2)-mean)^2)^.5)->roc_function_matrix
+threshold<-(which.max(roc_function_matrix$euclidean_dist))/length(roc_function_matrix[,1])
+as.data.frame(ROC_set)  %>% 
+  mutate(guess = prediction_set >threshold )->ROC_set
+ROC_set$guess[ROC_set$guess ==TRUE]<-1
+ROC_set$guess<-as.factor(ROC_set$guess)
+ROC_set$target<-as.factor(ROC_set$target)
+confusionMatrix(ROC_set$guess,ROC_set$target,positive="1")
+roc_function_matrix
